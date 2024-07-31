@@ -6,6 +6,7 @@ import 'package:api_tranning/widgets/action_button.dart';
 import 'package:api_tranning/widgets/info_with_button.dart';
 import 'package:api_tranning/widgets/superhero_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
@@ -43,7 +44,7 @@ class MainPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MainBloc bloc = Provider.of<MainBloc>(context);
+    final MainBloc bloc = Provider.of<MainBloc>(context, listen: false);
     return Stack(
       children: [
         const MainPageStateWidget(),
@@ -53,8 +54,63 @@ class MainPageContent extends StatelessWidget {
             onTap: () => bloc.nextState(),
             text: "Next state",
           ),
-        )
+        ),
+        const Padding(
+            padding: EdgeInsets.only(right: 16, left: 16, top: 12),
+            child: SearchField()),
       ],
+    );
+  }
+}
+
+class SearchField extends StatefulWidget {
+  const SearchField({super.key});
+
+  @override
+  State<SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<SearchField> {
+  final TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+      final MainBloc bloc = Provider.of<MainBloc>(context, listen: false);
+
+      controller.addListener(() => bloc.updateText(controller.text));
+    });
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(
+        fontWeight: FontWeight.w400,
+        fontSize: 20,
+        color: Colors.white,
+      ),
+      decoration: InputDecoration(
+          isDense: true,
+          fillColor: SuperHeroesColors.indigo75,
+          prefixIcon: const Icon(Icons.search, color: Colors.white54, size: 24),
+          suffix: GestureDetector(
+            onTap: () => controller.clear(),
+            child: Icon(
+              Icons.clear,
+              color: Colors.white,
+            ),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.white24),
+          )),
     );
   }
 }
@@ -86,7 +142,7 @@ class FavoritesWidget extends StatelessWidget {
             name: "Batman",
             realName: "Bruce Wayne",
             imageUrl:
-                'https://www.superherodb.com/pictures2/portraits/10/100/639.jpg',
+            'https://www.superherodb.com/pictures2/portraits/10/100/639.jpg',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -103,7 +159,7 @@ class FavoritesWidget extends StatelessWidget {
             name: 'Ironman',
             realName: 'Tony Stark',
             imageUrl:
-                'https://www.superherodb.com/pictures2/portraits/10/100/85.jpg',
+            'https://www.superherodb.com/pictures2/portraits/10/100/85.jpg',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -145,7 +201,7 @@ class SearchResultsWidget extends StatelessWidget {
             name: "Venom",
             realName: "Eddie Brock",
             imageUrl:
-                'https://www.superherodb.com/pictures2/portraits/10/100/22.jpg',
+            'https://www.superherodb.com/pictures2/portraits/10/100/22.jpg',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -162,7 +218,7 @@ class SearchResultsWidget extends StatelessWidget {
             name: 'Ironman',
             realName: 'Tony Stark',
             imageUrl:
-                'https://www.superherodb.com/pictures2/portraits/10/100/85.jpg',
+            'https://www.superherodb.com/pictures2/portraits/10/100/85.jpg',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -279,7 +335,7 @@ class MainPageStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MainBloc bloc = Provider.of<MainBloc>(context);
+    final MainBloc bloc = Provider.of<MainBloc>(context, listen: false);
     return StreamBuilder<MainPageState>(
       stream: bloc.observeMainPageState(),
       builder: (context, snapshot) {
